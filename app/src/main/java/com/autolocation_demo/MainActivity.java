@@ -12,6 +12,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         mGoogleApiClient.connect();
     }
+
 
     /* Check Location Permission for Marshmallow Devices */
     private void checkPermissions() {
@@ -161,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mGoogleApiClient.disconnect();
         //Unregister receiver on destroy
         if (gpsLocationReceiver != null)
             unregisterReceiver(gpsLocationReceiver);
@@ -212,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         request.setInterval(1000);
 
         request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
+        final FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
 
         final int permission = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -222,10 +225,11 @@ public class MainActivity extends AppCompatActivity {
             client.requestLocationUpdates(request, new LocationCallback() {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
-                    Location location =locationResult.getLastLocation();
+                    Location location = locationResult.getLastLocation();
                     double latitude = location.getLatitude();
                     double longitude = location.getLongitude();
-                    gps_status.setText(String.valueOf(latitude +"\t"+ longitude));
+                    gps_status.setText(String.valueOf(latitude + "\t" + longitude));
+
 
                 }
             }, null);
